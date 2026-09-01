@@ -152,6 +152,35 @@ REGRAS CRITICAS:
           description: 'Calcula o Score Financeiro Open Finance (0-1000) do usuario com recomendacoes.',
           parameters: { type: Type.OBJECT, properties: {} },
         },
+        {
+          name: 'add_debt',
+          description: 'Registra uma divida, boleto ou financiamento (Bacen SCR / Serasa).',
+          parameters: {
+            type: Type.OBJECT,
+            properties: {
+              name: { type: Type.STRING, description: 'Nome da divida, boleto ou contrato' },
+              institution: { type: Type.STRING, description: 'Banco, credor ou emissor (ex: Santander, Nubank, Caixa, Serasa)' },
+              total_amount: { type: Type.NUMBER, description: 'Valor total da divida' },
+              remaining_amount: { type: Type.NUMBER, description: 'Valor restante pendente' },
+              monthly_payment: { type: Type.NUMBER, description: 'Valor da parcela mensal (se parcelado)' },
+              interest_rate: { type: Type.NUMBER, description: 'Taxa de juros anual/mensal' },
+              due_date: { type: Type.STRING, description: 'Data de vencimento YYYY-MM-DD' },
+            },
+            required: ['name', 'total_amount'],
+          },
+        },
+        {
+          name: 'pay_debt',
+          description: 'Registra o pagamento ou abatimento de uma divida ou boleto cadastrado.',
+          parameters: {
+            type: Type.OBJECT,
+            properties: {
+              debt_id: { type: Type.NUMBER, description: 'ID da divida a ser abatida' },
+              payment_amount: { type: Type.NUMBER, description: 'Valor pago/abatido' },
+            },
+            required: ['debt_id', 'payment_amount'],
+          },
+        },
       ],
     }];
   }
@@ -286,6 +315,13 @@ Gere uma analise com: (1) Diagnostico do momento atual, (2) 2 acoes praticas ime
         reply = `Nenhum lancamento encontrado para desfazer.`;
       }
       reply += footer;
+      await saveHistory(rawText, reply);
+      return reply;
+    }
+
+    if (normalized === '8' || normalized.includes('divida') || normalized.includes('boleto') || normalized.includes('serasa') || normalized.includes('bacen') || normalized.includes('scr')) {
+      const debts = await financeService.getDebts(userPhone);
+      const reply = ReportService.formatDebts(debts) + footer;
       await saveHistory(rawText, reply);
       return reply;
     }
@@ -432,6 +468,34 @@ Gere uma analise com: (1) Diagnostico do momento atual, (2) 2 acoes praticas ime
             } else if (name === 'get_financial_score') {
               const scoreData = await financeService.getFinancialScore(userPhone);
               functionResult = { success: true, formattedMessage: ReportService.formatFinancialScore(scoreData) };
+            } else if (name === 'add_debt') {
+              const debt = await financeService.addDebt({
+                user_phone: userPhone,
+                name: String(args.name),
+                institution: args.institution,
+                total_amount: Number(args.total_amount),
+                remaining_amount: Number(args.remaining_amount || args.total_amount),
+                monthly_payment: Number(args.monthly_payment || 0),
+                interest_rate: Number(args.interest_rate || 0),
+                due_date: args.due_date,
+              });
+              let msg = `[DIVIDA / BOLETO REGISTRADO]\n*${debt.name}* (${debt.institution || 'Bacen/Serasa'})\n`;
+              msg += `Valor Total: *${ReportService.formatCurrency(debt.total_amount)}*\n`;
+              if (debt.monthly_payment > 0) msg += `Parcela Mensal: *${ReportService.formatCurrency(debt.monthly_payment)}*\n`;
+              if (debt.due_date) msg += `Vencimento: ${ReportService.formatDate(debt.due_date)}\n`;
+              msg += `Cadastrado sob ID #${debt.id}.`;
+              functionResult = { success: true, formattedMessage: msg };
+            } else if (name === 'pay_debt') {
+              const payRes = await financeService.payDebt(userPhone, Number(args.debt_id), Number(args.payment_amount));
+              let msg = '';
+              if (!payRes.debt) {
+                msg = `Divida #${args.debt_id} nao encontrada.`;
+              } else if (payRes.completed) {
+                msg = `🎉 *PARABENS!* Divida #${args.debt_id} (${payRes.debt.name}) foi *TOTALMENTE QUITADA*!\nSeu Score Open Finance vai subir!`;
+              } else {
+                msg = `[PAGAMENTO REGISTRADO]\nDivida #${args.debt_id} (${payRes.debt.name})\nValor pago: *${ReportService.formatCurrency(args.payment_amount)}*\nSaldo devedor restante: *${ReportService.formatCurrency(payRes.remaining)}*`;
+              }
+              functionResult = { success: !!payRes.debt, formattedMessage: msg };
             }
           } catch (fnErr: any) {
             console.error(`Erro na tool ${name}:`, fnErr);

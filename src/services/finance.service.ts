@@ -416,6 +416,63 @@ export class FinanceService {
     };
   }
 
+  // ─── DÍVIDAS & BOLETOS (SERASA / BACEN / SCR) ───────────────────────────
+
+  public async addDebt(debt: Omit<Debt, 'id'>): Promise<Debt & { id: number }> {
+    await this.ensureUser(debt.user_phone);
+    const result = await this.database.run(
+      `INSERT INTO debts (user_phone, name, institution, total_amount, remaining_amount, monthly_payment, interest_rate, due_date, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+      [
+        debt.user_phone,
+        debt.name,
+        debt.institution || 'Bacen / Serasa',
+        debt.total_amount,
+        debt.remaining_amount || debt.total_amount,
+        debt.monthly_payment || 0,
+        debt.interest_rate || 0,
+        debt.due_date || null,
+      ]
+    );
+    return { ...debt, id: result.lastID };
+  }
+
+  public async getDebts(user_phone: string, activeOnly: boolean = true): Promise<Debt[]> {
+    await this.ensureUser(user_phone);
+    const condition = activeOnly ? 'AND is_active = 1' : '';
+    return this.database.all<Debt>(
+      `SELECT * FROM debts WHERE user_phone = ? ${condition} ORDER BY due_date ASC, remaining_amount DESC`,
+      [user_phone]
+    );
+  }
+
+  public async payDebt(user_phone: string, debtId: number, paymentAmount: number): Promise<{ debt: Debt | null; remaining: number; completed: boolean }> {
+    const debt = await this.database.get<Debt>('SELECT * FROM debts WHERE id = ? AND user_phone = ?', [debtId, user_phone]);
+    if (!debt) return { debt: null, remaining: 0, completed: false };
+
+    const newRemaining = Math.max(0, debt.remaining_amount - paymentAmount);
+    const completed = newRemaining === 0;
+
+    await this.database.run(
+      `UPDATE debts SET remaining_amount = ?, is_active = ? WHERE id = ?`,
+      [newRemaining, completed ? 0 : 1, debtId]
+    );
+
+    // Registra como transação de despesa (pagamento de dívida / boleto)
+    await this.addTransaction({
+      user_phone,
+      type: 'expense',
+      amount: paymentAmount,
+      category: 'Contas',
+      description: `Pagamento: ${debt.name} (${debt.institution || 'Dívida'})`,
+      payment_method: 'boleto',
+      date: new Date().toISOString().split('T')[0],
+      raw_input: `Pagamento dívida #${debtId}`,
+    });
+
+    return { debt: { ...debt, remaining_amount: newRemaining }, remaining: newRemaining, completed };
+  }
+
   // ─── UTILITÁRIOS ───────────────────────────────────────────────────────────
 
   public async getAllTransactions(user_phone?: string): Promise<Transaction[]> {

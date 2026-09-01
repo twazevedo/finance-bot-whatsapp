@@ -101,6 +101,25 @@ export function createWebServer() {
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
+  // ─── GET /api/debts (Dívidas, Boletos, Bacen SCR, Serasa) ─────────────────
+  app.get('/api/debts', async (req, res) => {
+    try {
+      const phone = (req.query.phone as string) || CONFIG.DEFAULT_USER_PHONE;
+      const debts = await financeService.getDebts(phone);
+      res.json(debts);
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
+  // ─── POST /api/debts/pay (Abater / Pagar dívida ou boleto) ─────────────────
+  app.post('/api/debts/pay', async (req, res) => {
+    try {
+      const { debtId, amount, phone } = req.body;
+      const userPhone = phone || CONFIG.DEFAULT_USER_PHONE;
+      const result = await financeService.payDebt(userPhone, Number(debtId), Number(amount));
+      res.json({ success: true, result });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+  });
+
   // ─── GET /api/openfinance/summary ─────────────────────────────────────────
   app.get('/api/openfinance/summary', async (req, res) => {
     try {

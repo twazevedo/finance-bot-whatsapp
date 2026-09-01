@@ -217,6 +217,7 @@
   <div class="card">
     <div class="tabs">
       <div class="tab active" onclick="switchTab('extrato')">📑 Extrato</div>
+      <div class="tab" onclick="switchTab('dividas')">📄 Dívidas & Boletos (Bacen/Serasa)</div>
       <div class="tab" onclick="switchTab('bancos')">🏦 Bancos Reais (Open Finance)</div>
       <div class="tab" onclick="switchTab('chat')">💬 Chat IA</div>
       <div class="tab" onclick="switchTab('qr')">📱 WhatsApp</div>
@@ -228,6 +229,16 @@
         <table>
           <thead><tr><th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrição</th><th style="text-align:right">Valor</th></tr></thead>
           <tbody id="txBody"><tr><td colspan="5" class="loading"><div class="spinner"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-dividas">
+      <div class="section-title">Dívidas & Boletos Registrados <span>Base Bacen SCR & Serasa</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Dívida / Boleto</th><th>Credor / Instituição</th><th>Valor Total</th><th>Saldo Devedor</th><th>Parcela</th><th>Vencimento</th><th>Ação</th></tr></thead>
+          <tbody id="debtBody"><tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr></tbody>
         </table>
       </div>
     </div>
@@ -314,7 +325,7 @@ function updateStatusBadge(status, qrCode) {
 
 // ─── LOAD ALL ─────────────────────────────────────────────────────────────────
 async function refreshAll() {
-  await Promise.all([loadKPIs(), loadScore(), loadNetWorth(), loadGoals(), loadTransactions(), loadBanks()]);
+  await Promise.all([loadKPIs(), loadScore(), loadNetWorth(), loadGoals(), loadTransactions(), loadBanks(), loadDebts()]);
   const st = await fetch(`${API}/api/status`).then(r=>r.json());
   updateStatusBadge(st.status, st.qrCode);
 }
@@ -456,6 +467,54 @@ async function loadTransactions() {
       <td style="text-align:right;font-weight:700" class="${cls}">${sign}${fmt(tx.amount)}</td>
     </tr>`;
   }).join('');
+}
+
+async function loadDebts() {
+  const container = document.getElementById('debtBody');
+  try {
+    const debts = await fetch(`${API}/api/debts`).then(r => r.json());
+    if (!debts || !debts.length) {
+      container.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Nenhuma dívida ou boleto pendente! Seu nome está limpo no Bacen SCR / Serasa. 🎉</td></tr>`;
+      return;
+    }
+    container.innerHTML = debts.map(d => `
+      <tr>
+        <td style="font-weight:700">${d.name}</td>
+        <td><span class="badge" style="background:rgba(59,130,246,0.15);color:var(--accent2)">${d.institution || 'Bacen/Serasa'}</span></td>
+        <td style="color:var(--text2)">${fmt(d.total_amount)}</td>
+        <td style="font-weight:700;color:var(--red)">${fmt(d.remaining_amount)}</td>
+        <td style="color:var(--text3)">${d.monthly_payment > 0 ? fmt(d.monthly_payment) + '/mês' : '—'}</td>
+        <td style="color:var(--text3)">${d.due_date ? fmtDate(d.due_date) : '—'}</td>
+        <td>
+          <button class="btn btn-sm btn-primary" onclick="payDebtPrompt(${d.id}, '${d.name}', ${d.remaining_amount})">Abater / Pagar</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    container.innerHTML = `<tr><td colspan="7" class="loading">Erro ao carregar dívidas.</td></tr>`;
+  }
+}
+
+async function payDebtPrompt(debtId, debtName, remaining) {
+  const amountStr = prompt(`Informe o valor a pagar para ${debtName} (Saldo devedor: R$ ${remaining}):`, remaining);
+  if (!amountStr) return;
+  const amount = parseFloat(amountStr.replace(',', '.'));
+  if (isNaN(amount) || amount <= 0) {
+    alert('Valor inválido.');
+    return;
+  }
+  const res = await fetch(`${API}/api/debts/pay`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ debtId, amount })
+  }).then(r => r.json());
+
+  if (res.success) {
+    alert(res.result.completed ? `🎉 Parabéns! A dívida ${debtName} foi totalmente quitada!` : `Pagamento de R$ ${amount} registrado com sucesso!`);
+    refreshAll();
+  } else {
+    alert('Erro ao registrar pagamento.');
+  }
 }
 
 // ─── QR CODE ──────────────────────────────────────────────────────────────────

@@ -47,7 +47,7 @@ export class OpenFinanceService {
   }
 
   // Sincroniza contas e transações reais de uma conexão bancária
-  public async syncItem(userPhone: string, itemId: string): Promise<{ accountsUpdated: number; transactionsSynced: number }> {
+  public async syncItem(userPhone: string, itemId: string): Promise<{ accountsUpdated: number; transactionsSynced: number; debtsSynced: number }> {
     if (!this.client) {
       throw new Error('Pluggy não está configurado.');
     }
@@ -119,7 +119,31 @@ export class OpenFinanceService {
       }
     }
 
-    return { accountsUpdated, transactionsSynced };
+    // Sincroniza Empréstimos, Financiamentos e Dívidas (SCR Bacen / Open Finance)
+    let debtsSynced = 0;
+    try {
+      if ((this.client as any).fetchLoans) {
+        const loansResponse = await (this.client as any).fetchLoans(itemId);
+        const loans = loansResponse.results || [];
+        for (const loan of loans) {
+          await financeService.addDebt({
+            user_phone: userPhone,
+            name: loan.contractNumber ? `Contrato ${loan.contractNumber}` : (loan.name || 'Empréstimo/Financiamento'),
+            institution: loan.institution || 'Bacen SCR / Banco',
+            total_amount: loan.contractAmount || loan.amount || 0,
+            remaining_amount: loan.balanceDue || loan.totalAmount || 0,
+            monthly_payment: loan.installmentAmount || 0,
+            interest_rate: loan.interestRate || 0,
+            due_date: loan.dueDate || undefined,
+          });
+          debtsSynced++;
+        }
+      }
+    } catch (loanErr) {
+      console.warn('Aviso ao sincronizar empréstimos/dívidas Pluggy:', loanErr);
+    }
+
+    return { accountsUpdated, transactionsSynced, debtsSynced };
   }
 
   // Lista os conectores disponíveis no Brasil (Nubank, Itaú, etc)

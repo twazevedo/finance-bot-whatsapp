@@ -34,6 +34,7 @@ export class ReportService {
       '5 - Patrimonio Liquido',
       '6 - Dica com IA',
       '7 - Desfazer Lancamento',
+      '8 - Dividas & Boletos (Bacen/Serasa)',
     ].join('\n');
   }
 
@@ -181,6 +182,39 @@ export class ReportService {
     for (const tip of score.tips.slice(0, 3)) {
       msg += `• ${tip}\n`;
     }
+    return msg.trimEnd();
+  }
+
+  // ─── DÍVIDAS & BOLETOS (SERASA / BACEN / SCR) ───────────────────────────
+
+  public static formatDebts(debts: any[]): string {
+    if (debts.length === 0) {
+      let msg = `📄 *DIVIDAS E BOLETOS (OPEN FINANCE / BACEN / SERASA)*\n`;
+      msg += `------------------------------\n`;
+      msg += `Nenhuma divida ou boleto pendente registrado.\n`;
+      msg += `Seu nome esta limpo e sem apontamentos no SCR / Serasa! 🎉\n\n`;
+      msg += `Para cadastrar um boleto ou divida manual:\n`;
+      msg += `Exemplo: _"Tenho divida de R$ 1.200 no Santander com parcela de R$ 150"_`;
+      return msg;
+    }
+
+    const totalRemaining = debts.reduce((acc, d) => acc + (d.remaining_amount || 0), 0);
+    const totalMonthly = debts.reduce((acc, d) => acc + (d.monthly_payment || 0), 0);
+
+    let msg = `📄 *DIVIDAS E BOLETOS (OPEN FINANCE / BACEN / SERASA)*\n`;
+    msg += `------------------------------\n`;
+    msg += `Total de Dividas:  *${this.formatCurrency(totalRemaining)}*\n`;
+    if (totalMonthly > 0) msg += `Parcelas Mensais:  *${this.formatCurrency(totalMonthly)}/mes*\n`;
+    msg += `------------------------------\n\n`;
+
+    for (const d of debts) {
+      msg += `⚠️ *${d.name}* (${d.institution || 'Bacen/Serasa'})\n`;
+      msg += `   Restante: *${this.formatCurrency(d.remaining_amount)}* de ${this.formatCurrency(d.total_amount)}\n`;
+      if (d.monthly_payment > 0) msg += `   Parcela: ${this.formatCurrency(d.monthly_payment)}\n`;
+      if (d.due_date) msg += `   Vencimento: ${this.formatDate(d.due_date)}\n`;
+      msg += `   ID: #${d.id} (Envie _"Paguei R$ X da divida #${d.id}"_ para abater)\n\n`;
+    }
+
     return msg.trimEnd();
   }
 }
