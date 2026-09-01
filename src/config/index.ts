@@ -12,4 +12,6 @@ export const CONFIG = {
   DEFAULT_USER_PHONE: process.env.DEFAULT_USER_PHONE || '5511945868954',
   CURRENCY_SYMBOL: 'R$',
   TIMEZONE: 'America/Sao_Paulo',
+  PLUGGY_CLIENT_ID: process.env.PLUGGY_CLIENT_ID || '',
+  PLUGGY_CLIENT_SECRET: process.env.PLUGGY_CLIENT_SECRET || '',
 };

@@ -7,8 +7,8 @@ export class MessageHandler {
     const fromJid = msg.key.remoteJid;
     if (!fromJid || fromJid === 'status@broadcast') return;
 
-    // Ignora mensagens de grupos por padrão
-    if (fromJid.endsWith('@g.us')) {
+    // Ignora mensagens de grupos, canais e newsletters
+    if (fromJid.endsWith('@g.us') || fromJid.endsWith('@newsletter') || fromJid.endsWith('@broadcast')) {
       return;
     }
 

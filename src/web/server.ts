@@ -127,6 +127,53 @@ export function createWebServer() {
     } catch (err: any) { res.status(500).json({ error: err.message }); }
   });
 
+  // ─── OPEN FINANCE / PLUGGY BANCOS REAIS ──────────────────────────────────
+  // 1. Status da integração Open Finance
+  app.get('/api/openfinance/status', (req, res) => {
+    const { openFinanceService } = require('../services/openfinance.service.js');
+    res.json({
+      configured: openFinanceService.isConfigured(),
+      hasClientId: !!CONFIG.PLUGGY_CLIENT_ID,
+    });
+  });
+
+  // 2. Criar token de conexão segura para o widget
+  app.post('/api/openfinance/connect-token', async (req, res) => {
+    try {
+      const { openFinanceService } = await import('../services/openfinance.service.js');
+      const token = await openFinanceService.createConnectToken();
+      res.json({ success: true, accessToken: token });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // 3. Listar bancos brasileiros disponíveis
+  app.get('/api/openfinance/banks', async (req, res) => {
+    try {
+      const { openFinanceService } = await import('../services/openfinance.service.js');
+      const search = req.query.search as string | undefined;
+      const banks = await openFinanceService.getAvailableConnectors(search);
+      res.json(banks);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // 4. Sincronizar dados bancários após conexão
+  app.post('/api/openfinance/sync', async (req, res) => {
+    try {
+      const { itemId, phone } = req.body;
+      if (!itemId) return res.status(400).json({ error: 'itemId é obrigatório' });
+      const userPhone = phone || CONFIG.DEFAULT_USER_PHONE;
+      const { openFinanceService } = await import('../services/openfinance.service.js');
+      const result = await openFinanceService.syncItem(userPhone, itemId);
+      res.json({ success: true, result });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   // ─── POST /api/chat ────────────────────────────────────────────────────────
   app.post('/api/chat', async (req, res) => {
     try {
