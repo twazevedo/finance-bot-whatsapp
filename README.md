@@ -1,47 +1,85 @@
-# 🏦 Open Finance IA — Consultor Financeiro Pessoal no WhatsApp & Web
+<div align="center">
 
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-![NodeJS](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
-![Google Gemini](https://img.shields.io/badge/Google%20Gemini%203.6%20Flash-8E75B2?style=for-the-badge&logo=google&logoColor=white)
-![WhatsApp](https://img.shields.io/badge/WhatsApp%20API-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)
-![Open Finance](https://img.shields.io/badge/Open%20Finance-BACEN%20Standard-00D4AA?style=for-the-badge)
-![SQLite](https://img.shields.io/badge/SQLite3-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
-![PWA](https://img.shields.io/badge/PWA%20Ready-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)
+# 🏦 Open Finance IA
+### Assistente Financeiro Autônomo Multimodal no WhatsApp & Dashboard Web Executivo
 
-Assistente financeiro pessoal de nível executivo integrado ao **WhatsApp** e compatível com as diretrizes do **Open Finance Brasil (Banco Central)**. Utiliza Inteligência Artificial Multimodal com **Google Gemini 3.6 Flash** (Function Calling), transcrição de áudio de voz, reconhecimento OCR de comprovantes, sincronização bancária (Pluggy API), monitoramento de dívidas (Bacen SCR / Serasa) e painel web responsivo em tempo real.
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![NodeJS](https://img.shields.io/badge/Node.js-18+-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Google Gemini](https://img.shields.io/badge/Gemini%203.6%20Flash-Function%20Calling-8E75B2?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
+[![WhatsApp](https://img.shields.io/badge/WhatsApp%20Baileys-Multi--Device-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://github.com/WhiskeySockets/Baileys)
+[![Open Finance](https://img.shields.io/badge/Open%20Finance-BACEN%20Standard-00D4AA?style=for-the-badge)](https://openfinancebrasil.org.br/)
+[![SQLite](https://img.shields.io/badge/SQLite3-WAL%20Mode-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![PWA](https://img.shields.io/badge/PWA%20Ready-Installable%20App-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](./LICENSE)
+
+<p align="center">
+  <b>Elimine planilhas burocráticas: controle receitas, despesas, cartões, investimentos e dívidas em tempo real conversando por voz ou texto no WhatsApp.</b>
+</p>
+
+[Funcionalidades](#-funcionalidades-de-destaque) •
+[Arquitetura do Sistema](#-arquitetura-do-sistema) •
+[Modelo de Dados](#-modelo-de-dados-er) •
+[Clean Code & POO](#-engenharia-de-software--clean-code) •
+[Como Executar](#-como-executar-passo-a-passo) •
+[API & Endpoints](#-api-rest--endpoints) •
+[Atalhos](#-atalhos-rápidos-no-whatsapp)
 
 ---
 
-## 🗺️ 1. Arquitetura do Sistema & Fluxo de Dados
+</div>
 
-O diagrama abaixo ilustra o fluxo ponta a ponta desde a entrada do usuário (WhatsApp ou Dashboard Web) até o processamento da IA com Tool Calling e persistência:
+## 📌 Visão Geral do Projeto
+
+O **Open Finance IA** é uma solução *end-to-end* desenvolvida para transformar o controle financeiro pessoal em uma experiência intuitiva e conversacional. Integrado diretamente ao **WhatsApp** através do protocolo Multi-Device da biblioteca **Baileys**, o sistema conta com o poder cognitivo do **Google Gemini 3.6 Flash** utilizando **Function Calling (Tool Calling)** determinístico para executar operações financeiras com precisão bancária.
+
+Além da interface conversacional móvel, a solução disponibiliza um **Dashboard Web PWA** em tempo real com **WebSockets**, gráficos dinâmicos (Chart.js), integração de agregação bancária (**Pluggy API**) e consolidação de passivos baseados no **SCR do Banco Central (Bacen)** e birôs de crédito (**Serasa**).
+
+---
+
+## ✨ Funcionalidades de Destaque
+
+| Recurso | Descrição | Tecnologia |
+|---|---|---|
+| 🎙️ **Voz & Áudio Natural** | Envie áudios de voz (*"Gastei R$ 52 no almoço"*). A IA transcreve, categoriza e registra na hora. | Gemini Audio Processing |
+| 📷 **Visão Computacional (OCR)** | Tire foto de notas fiscais ou comprovantes Pix; extração automática de valor, local e data. | Gemini Multimodal Vision |
+| 📈 **Score Open Finance (0-1000)** | Pontuação de saúde financeira calculada dinamicamente com base em 5 pilares regulatórios. | Algoritmo Bacen Scoring |
+| 💎 **Patrimônio Consolidado** | Apuração de ativos líquidos, carteira de investimentos (CDB, Ações, FIIs) e dívidas ativas. | Valuation Engine |
+| 🏦 **Agregação Bancária Real** | Conexão segura com Nubank, Itaú, Bradesco, Inter e +80 instituições financeiras. | Pluggy Open Finance API |
+| 📄 **Dívidas & Boletos (Bacen/Serasa)** | Rastreamento de empréstimos (SCR) e boletos com assistente de quitação e metas de amortização. | Bacen SCR / DDA Flow |
+| 📱 **PWA Instalável** | Painel executivo com tema escuro instalável no celular como aplicativo nativo. | Service Worker & Manifest |
+
+---
+
+## 🗺️ Arquitetura do Sistema
+
+O diagrama abaixo ilustra o fluxo de dados desacoplado e a segregação de responsabilidades do ecossistema:
 
 ```mermaid
 flowchart TB
-    subgraph Clients["Camada de Entrada (Clients)"]
-        WPP["📱 WhatsApp Mobile / Web<br/>(Áudio, Foto, Texto)"]
-        DASH["💻 Dashboard Web PWA<br/>(Chart.js, WebSockets)"]
+    subgraph Clients["1. Camada de Clientes (User Touchpoints)"]
+        WPP["📱 WhatsApp Mobile / Web<br/>(Áudio, Comprovantes, Comandos)"]
+        DASH["💻 Dashboard Web PWA<br/>(Chart.js, Métricas, WebSockets)"]
     end
 
-    subgraph Gateway["Camada de Comunicação & Gateway"]
-        BAILEYS["Baileys Socket Client<br/>(Manipulação de Mensagens & QR Code)"]
-        EXPRESS["Express REST API & WebSocket Server<br/>(:3333)"]
+    subgraph Gateway["2. Gateway & Comunicação em Tempo Real"]
+        BAILEYS["Baileys Socket Client<br/>(Gerenciador de Sessão QR / Multi-Device)"]
+        EXPRESS["Express REST API & WS Server<br/>(Porta 3333 / CORS / JSON Parser)"]
     end
 
-    subgraph AI["Inteligência Artificial (Gemini 3.6 Flash)"]
-        VISION["Visão Multimodal (OCR Cupom Fiscal)"]
-        AUDIO_PROC["Transcrição e Análise de Áudio"]
-        TOOL_ENGINE["Engine de Function Calling<br/>(12 Ferramentas Autônomas)"]
+    subgraph AI["3. Camada de Inteligência Artificial (Gemini 3.6 Flash)"]
+        TOOL_ENGINE["Orquestrador de Function Calling<br/>(12 Ferramentas Autônomas)"]
+        VISION["Pipeline de Visão OCR"]
+        AUDIO_PROC["Pipeline de Transcrição Fonética"]
     end
 
-    subgraph Services["Serviços de Domínio (POO & Regras de Negócio)"]
-        FINANCE_SVC["FinanceService<br/>- Score (0-1000)<br/>- Patrimônio Líquido<br/>- Metas & Orçamentos"]
-        OPENFIN_SVC["OpenFinanceService<br/>- Integração Pluggy API<br/>- Bacen SCR & Serasa<br/>- Dívidas & Boletos"]
-        REPORT_SVC["ReportService<br/>- Formatador ASCII Executivo<br/>- Alertas de Consumo"]
+    subgraph Services["4. Camada de Domínio & Negócio (POO)"]
+        FINANCE_SVC["FinanceService<br/>- Score 0-1000<br/>- Patrimônio Líquido<br/>- Metas & Orçamentos"]
+        OPENFIN_SVC["OpenFinanceService<br/>- Pluggy API Gateway<br/>- Bacen SCR & Serasa<br/>- DDA & Boletos"]
+        REPORT_SVC["ReportService<br/>- Formatador ASCII Executivo<br/>- Alertas Preventivos"]
     end
 
-    subgraph Storage["Camada de Persistência (SQLite / WAL Mode)"]
-        DB[(Banco SQLite: finance.db<br/>- users, accounts, transactions<br/>- budgets, investments, debts, goals)]
+    subgraph Storage["5. Camada de Persistência (High-Performance SQLite)"]
+        DB[(Banco SQLite: finance.db<br/>PRAGMA WAL Mode<br/>Índices Compostos de Busca)]
     end
 
     WPP --> BAILEYS
@@ -63,9 +101,9 @@ flowchart TB
 
 ---
 
-## 🗄️ 2. Diagrama Entidade-Relacionamento (Banco de Dados)
+## 🗄️ Modelo de Dados (ER)
 
-O modelo relacional foi projetado seguindo as normas do Open Finance Brasil para acomodar ativos, passivos e histórico de transações:
+O schema do banco foi estruturado em conformidade com as diretrizes relacionais do Open Finance Brasil:
 
 ```mermaid
 erDiagram
@@ -78,163 +116,219 @@ erDiagram
     USERS ||--o{ CHAT_HISTORY : conversa
 
     USERS {
-        string phone PK "Telefone E.164 (ex: 5511999999999)"
-        string name "Nome do usuário"
-        datetime created_at "Data de adesão"
+        string phone PK "Telefone no padrão E.164"
+        string name "Nome do titular da conta"
+        datetime created_at "Timestamp de adesão"
     }
 
     ACCOUNTS {
-        int id PK
-        string user_phone FK
-        string institution "Nubank, Itaú, etc."
+        int id PK "Auto Increment"
+        string user_phone FK "Vínculo ao usuário"
+        string institution "Nubank, Itaú, Bradesco, Inter"
         string account_type "checking | savings | credit_card | investment"
-        string name "Identificador da conta"
-        real balance "Saldo atual"
-        real credit_limit "Limite de crédito"
-        int is_active "1 para ativa"
+        string name "Rótulo descritivo da conta"
+        real balance "Saldo disponível em BRL"
+        real credit_limit "Limite de crédito atribuído"
+        int is_active "Booleano (1 ativo, 0 inativo)"
     }
 
     TRANSACTIONS {
-        int id PK
-        string user_phone FK
+        int id PK "Identificador único"
+        string user_phone FK "Vínculo ao titular"
         string type "income | expense | transfer"
-        real amount "Valor da operação"
-        string category "Alimentação, Transporte, etc."
-        string description "Descrição da despesa"
-        string payment_method "pix | cartao_credito | boleto"
-        string date "YYYY-MM-DD"
-        string raw_input "Entrada original (voz/texto)"
+        real amount "Valor monetário da transação"
+        string category "Alimentação, Transporte, Moradia, etc."
+        string description "Estabelecimento ou detalhe"
+        string payment_method "pix | cartao_credito | boleto | dinheiro"
+        string date "Data contábil (YYYY-MM-DD)"
+        string raw_input "Entrada original capturada"
     }
 
     BUDGETS {
         int id PK
         string user_phone FK
         string category "Categoria orçada"
-        real amount_limit "Teto mensal estipulado"
-        string period "YYYY-MM"
+        real amount_limit "Teto máximo mensal estipulado"
+        string period "Mês de vigência (YYYY-MM)"
     }
 
     INVESTMENTS {
         int id PK
         string user_phone FK
-        string name "CDB, Tesouro, Ações"
-        string type "Renda Fixa, Variável"
-        real amount_invested "Custo de aquisição"
-        real current_value "Marcação a mercado"
+        string name "Ativo (ex: CDB 120% CDI, Tesouro IPCA)"
+        string type "Renda Fixa, Ações, FIIs, Fundos"
+        real amount_invested "Custo histórico de aporte"
+        real current_value "Marcação a mercado atual"
     }
 
     DEBTS {
         int id PK
         string user_phone FK
-        string name "Contrato / Empréstimo / Financiamento"
+        string name "Identificador da obrigação / Contrato"
         string institution "Bacen SCR / Serasa / Credor"
-        real total_amount "Valor total contratado"
-        real remaining_amount "Saldo devedor restante"
-        real monthly_payment "Valor da parcela"
-        real interest_rate "Taxa de juros anual/mensal"
-        string due_date "Data de vencimento"
-        int is_active "1 se pendente"
+        real total_amount "Valor total originário"
+        real remaining_amount "Saldo devedor em aberto"
+        real monthly_payment "Valor da prestação periódica"
+        real interest_rate "Taxa de juros pactuada (% a.a.)"
+        string due_date "Data de vencimento do título"
+        int is_active "1 em aberto, 0 quitado"
     }
 
     FINANCIAL_GOALS {
         int id PK
         string user_phone FK
-        string name "Reserva de Emergência, etc."
-        real target_amount "Montante alvo"
-        real current_amount "Montante acumulado"
-        string deadline "Data limite"
-        int priority "1=Alta, 2=Média, 3=Baixa"
+        string name "Título do objetivo financeiro"
+        real target_amount "Montante final desejado"
+        real current_amount "Valor provisionado até o momento"
+        string deadline "Data estipulada para conclusão"
+        int priority "Nível de criticidade (1 Alta, 2 Média, 3 Baixa)"
     }
 
     CHAT_HISTORY {
         int id PK
         string user_phone FK
-        string role "user | model"
-        string content "Texto da mensagem"
+        string role "user ou model"
+        string content "Log histórico de contexto"
     }
 ```
 
 ---
 
-## 🏛️ 3. Boas Práticas de POO e Clean Code Aplicadas
+## 🏛️ Engenharia de Software & Clean Code
 
-Este projeto foi construído para demonstrar **Engenharia de Software de nível sênior**:
+O projeto segue rigorosos padrões de qualidade aplicados na indústria:
 
-1. **Princípio da Responsabilidade Única (SRP)**:
-   - `FinanceService`: Responsável exclusivamente pelas regras de negócio financeiras, cálculos de Score e consolidação de balanços.
-   - `OpenFinanceService`: Isola a integração com APIs bancárias de terceiros (Pluggy, Bacen, Serasa).
-   - `ReportService`: Classe utilitária com métodos puros para formatação visual limpa e compatível com clientes móveis.
-   - `GeminiService`: Encapsula a orquestração de LLM e invocação de chamadas de funções (*Tool Calling*).
+### 1. Princípios SOLID Aplicados
+- **Single Responsibility Principle (SRP)**:
+  - `FinanceService`: Isola os cálculos e regras contábeis puras (Score 0-1000, balanço, taxa de poupança).
+  - `OpenFinanceService`: Gerencia a integração com a API da Pluggy e sincronização de contratos de crédito.
+  - `ReportService`: Cuida unicamente da renderização visual e formatação de texto dos relatórios.
+  - `GeminiService`: Encapsula a invocação e conversão de schemas do SDK de IA.
+- **Open/Closed Principle (OCP)**: A lista de ferramentas (`tools`) do Gemini é extensível sem necessidade de refatorar a máquina de inferência.
+- **Dependency Inversion (DIP)**: Serviços recebem instâncias de conexão com o banco via injeção em construtor, simplificando testes unitários com bancos em memória.
 
-2. **Tipagem Estrita (TypeScript Strict Mode)**:
-   - Interfaces detalhadas para todas as entidades de negócio (`Transaction`, `Debt`, `NetWorth`, `FinancialScore`, `Budget`, `Investment`).
-   - Zero dependência de tipagens genéricas soltas (`any`) nos contratos principais.
+### 2. Tipagem Estrita e Modelagem de Dados
+- Desenvolvido em **TypeScript Strict Mode** (`tsconfig.json` com `noImplicitAny: true`).
+- Todas as transferências e DTOs possuem tipagem estrita (`Transaction`, `Debt`, `FinancialScore`, `NetWorth`).
 
-3. **Performance e Resiliência**:
-   - SQLite configurado com **PRAGMA WAL Mode** (Write-Ahead Logging) e índices compostos (`idx_tx_phone_date`, `idx_goals_phone`) para leituras concorrentes ultrarrápidas.
-   - Tratamento de reconexão automática com backoff exponencial no socket do WhatsApp.
-   - Sanitização de caracteres para prevenir falhas de renderização em aparelhos Android/iOS legados.
-
----
-
-## ✨ Principais Destaques & Funcionalidades
-
-### 📈 1. Algoritmo de Score Open Finance (0–1000)
-- Cálculo da pontuação financeira com base em 5 pilares do Banco Central: Taxa de Poupança (25%), Aderência ao Orçamento (25%), Metas (20%), Endividamento (20%) e Consistência (10%).
-
-### 🎙️ 2. Interação Multimodal por Voz e Foto (WhatsApp)
-- **Mensagens de Áudio**: Fale naturalmente (*"Gastei R$ 45 no almoço no débito"* ou *"Recebi R$ 1.500 no Pix"*) e a IA transcreve, interpreta a intenção e registra automaticamente.
-- **Cupons e Comprovantes (OCR)**: Tire foto da nota fiscal; a visão computacional do Gemini extrai valor, estabelecimento, data e categoria.
-
-### 🏦 3. Dívidas & Boletos (Bacen SCR / Serasa / Open Finance)
-- Monitoramento de saldo devedor consolidado de empréstimos, financiamentos e faturas.
-- Abatimento dinâmico com quitação assistida (*"Paguei R$ 300 da dívida #1"*).
-
-### 📱 4. Dashboard Executivo PWA
-- Interface moderna em `http://localhost:3333` com atualização reativa via WebSockets.
-- Gráficos de pizza com Chart.js, cartões de patrimônio líquido e simulador de chat integrado.
-- PWA instalável no celular com tela cheia e ícone nativo.
+### 3. Otimizações de Banco de Dados
+- **WAL Mode (Write-Ahead Logging)** habilitado no SQLite: permite leituras e escritas concorrentes sem travar o processo.
+- **Índices Estratégicos**:
+  - `idx_tx_phone_date` em `transactions(user_phone, date DESC)` para emissão instantânea de extratos.
+  - `idx_goals_phone` em `financial_goals(user_phone, status)` para relatórios de metas.
 
 ---
 
-## 🚀 Como Executar Localmente
+## 📊 Matriz do Score Open Finance (0–1000)
 
+O algoritmo proprietário de pontuação reflete a metodologia de crédito das principais instituições financeiras brasileiras:
+
+| Pilar | Peso | Critério de Avaliação |
+|---|:---:|---|
+| **Taxa de Poupança** | **25% (250 pts)** | Proporção da renda líquida retida no mês (\( \ge 25\% \) garante pontuação máxima). |
+| **Aderência ao Orçamento** | **25% (250 pts)** | Manutenção dos gastos dentro dos tetos estipulados por categoria. |
+| **Progresso em Metas** | **20% (200 pts)** | Percentual médio de integralização das metas ativas. |
+| **Ratio de Endividamento** | **20% (200 pts)** | Relação entre passivos totais e patrimônio ativo (\( \text{Dívidas} / \text{Ativos} \)). |
+| **Consistência de Lançamentos** | **10% (100 pts)** | Regularidade de registros no período para acurácia de análise. |
+
+---
+
+## 🚀 Como Executar Passo a Passo
+
+### Pré-requisitos
+- **Node.js** (v18.0 ou superior)
+- **npm** (v9.0 ou superior)
+- Conta no **Google AI Studio** para obter sua chave de API gratuita do Gemini
+
+### 1. Clonar o Repositório
 ```bash
-# 1. Clonar o repositório
 git clone https://github.com/twazevedo/finance-bot-whatsapp.git
 cd finance-bot-whatsapp
+```
 
-# 2. Instalar dependências
+### 2. Instalar as Dependências
+```bash
 npm install
+```
 
-# 3. Configurar variáveis de ambiente (.env)
-# Insira sua GEMINI_API_KEY obtida no Google AI Studio
+### 3. Configurar as Variáveis de Ambiente
+Crie seu arquivo `.env` com base no modelo fornecido:
+```bash
 cp .env.example .env
+```
 
-# 4. Executar os testes automatizados
+Preencha as chaves:
+```env
+PORT=3333
+NODE_ENV=development
+GEMINI_API_KEY=sua_chave_do_google_ai_studio
+GEMINI_MODEL=gemini-3.6-flash
+DEFAULT_USER_PHONE=5511999999999
+PLUGGY_CLIENT_ID=sua_chave_pluggy_opcional
+PLUGGY_CLIENT_SECRET=seu_segredo_pluggy_opcional
+```
+
+### 4. Executar os Testes Automatizados
+```bash
 npx tsx src/tests/finance.test.ts
+```
 
-# 5. Iniciar o servidor
+### 5. Iniciar a Aplicação
+```bash
 npm run dev
 ```
+
+### 6. Parear com o WhatsApp
+1. Abra o navegador em `http://localhost:3333`.
+2. No seu celular, abra o WhatsApp > **Aparelhos Conectados** > **Conectar um aparelho**.
+3. Escaneie o QR Code exibido no terminal ou na interface web.
+
+---
+
+## 🔌 API REST & Endpoints
+
+O servidor Express disponibiliza uma interface RESTful documentada:
+
+| Método | Rota | Descrição |
+|---|---|---|
+| `GET` | `/api/status` | Retorna o status de conexão com WhatsApp e versão do modelo de IA. |
+| `GET` | `/api/summary` | Sumário contábil do mês (receitas, despesas, saldo, poupança). |
+| `GET` | `/api/transactions` | Extrato de lançamentos com paginação e filtro por categoria. |
+| `GET` | `/api/financial-score` | Score Open Finance (0-1000) e detalhamento dos 5 componentes. |
+| `GET` | `/api/net-worth` | Balanço consolidado de patrimônio líquido (ativos vs passivos). |
+| `GET` | `/api/goals` | Listagem e evolução de metas de vida ativas. |
+| `GET` | `/api/debts` | Dívidas, empréstimos e boletos cadastrados (Bacen SCR / Serasa). |
+| `POST` | `/api/debts/pay` | Registra abatimento ou quitação de dívida/boleto. |
+| `POST` | `/api/chat` | Simulador de chat com a IA via web. |
+| `POST` | `/api/openfinance/connect-token` | Gera token seguro para abertura do widget Pluggy Connect. |
+| `POST` | `/api/openfinance/sync` | Aciona a sincronização forçada de transações bancárias. |
 
 ---
 
 ## 📲 Atalhos Rápidos no WhatsApp
 
-| Número | Ação |
-|---|---|
-| **1** | 📊 Saldo e Resumo do Mês |
-| **2** | 📑 Extrato Detalhado |
-| **3** | 🎯 Metas & Orçamentos |
-| **4** | 📈 Score Financeiro (Open Finance) |
-| **5** | 💎 Patrimônio Líquido |
-| **6** | 💡 Consultoria Financeira IA |
-| **7** | ↩️ Desfazer Lançamento |
-| **8** | 📄 Dívidas & Boletos (Bacen / Serasa) |
+Ao interagir com o bot, você pode digitar o número ou usar linguagem natural:
+
+```text
+>> AÇÕES RÁPIDAS <<
+1 - Saldo e Resumo do Mês
+2 - Extrato Detalhado
+3 - Metas & Orçamentos
+4 - Score Financeiro (Open Finance)
+5 - Patrimônio Líquido
+6 - Consultoria Financeira com IA
+7 - Desfazer Último Lançamento
+8 - Dívidas & Boletos (Bacen / Serasa)
+```
 
 ---
 
 ## 📄 Licença
 
-Este projeto está sob a licença [MIT](./LICENSE).
+Distribuído sob a licença **MIT**. Consulte o arquivo [LICENSE](./LICENSE) para obter mais informações.
+
+---
+
+<div align="center">
+  <sub>Desenvolvido com foco em alta performance, privacidade local e conformidade com o ecossistema Open Finance Brasil.</sub>
+</div>
