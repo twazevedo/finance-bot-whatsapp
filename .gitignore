@@ -1,7 +1,7 @@
 auth_info_baileys/
-finance.db
+finance.db*
 node_modules/
 *.log
 .env
-test_finance.db
+test_finance.db*
 dist/
