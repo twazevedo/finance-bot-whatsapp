@@ -9,7 +9,7 @@ async function test() {
   console.log(`📤 Enviando prompt para a IA: "${prompt}"`);
 
   const response = await geminiService.processMessage({
-    userPhone: '5511945868954',
+    userPhone: '5511999999999',
     text: prompt,
   });
 
@@ -19,7 +19,7 @@ async function test() {
   // Teste 2: Consultar Saldo
   console.log('\n📤 Testando consulta de saldo: "Qual meu saldo atual?"');
   const balanceResponse = await geminiService.processMessage({
-    userPhone: '5511945868954',
+    userPhone: '5511999999999',
     text: 'Qual meu saldo atual?',
   });
 

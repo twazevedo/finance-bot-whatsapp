@@ -17,7 +17,7 @@ async function runTests() {
   console.log('✅ 1. Inicialização do banco SQLite de teste concluída com sucesso.');
 
   // Usamos o serviço para os testes com o banco de teste
-  const testPhone = '5511945868954';
+  const testPhone = '5511999999999';
   const finance = new FinanceService(testDb);
 
   // Teste 1: Adicionar Receita

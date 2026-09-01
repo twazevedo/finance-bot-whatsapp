@@ -78,7 +78,7 @@ erDiagram
     USERS ||--o{ CHAT_HISTORY : conversa
 
     USERS {
-        string phone PK "Telefone E.164 (ex: 5511945868954)"
+        string phone PK "Telefone E.164 (ex: 5511999999999)"
         string name "Nome do usuário"
         datetime created_at "Data de adesão"
     }
